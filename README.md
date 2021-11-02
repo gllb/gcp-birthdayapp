@@ -1,5 +1,7 @@
 Goal of this project is to deploy a highly available API and a database backend on GCP.
 
+![Alt text](./diagram.svg)
+
 # Terraform
 - Create 2 VPC app/db https://github.com/terraform-google-modules/terraform-google-network
 - Create a VPC peering https://registry.terraform.io/modules/terraform-google-modules/network/google/latest/submodules/network-peering
