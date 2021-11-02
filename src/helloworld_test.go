@@ -1,65 +1,40 @@
-package helloworld
+package main
 
 import (
 	"testing"
-	"time"
 	"net/http"
 	"net/http/httptest"
 	"encoding/json"
 	"bytes"
-
 	"fmt"
+	// "log"
 )
-type Birthday struct {
-	dateOfBirth time.Time
-}
-
-const shortForm = "2006-01-02"
-
-func newBirthday(date string) Birthday {
-	t, _ := time.Parse(shortForm, date)
-	return Birthday{
-		dateOfBirth: t,
-	}
-}
-
-func (birthday *Birthday) MarshalJSON() ([]byte, error) {
-	type Alias Birthday
-	return json.Marshal(&struct {
-		*Alias
-		dateOfBirth string `json:"stamp"`
-	}{
-		Alias: (*Alias)(birthday),
-		dateOfBirth: birthday.dateOfBirth.Format(shortForm),
-	})
-}
-
-func formatBirthday(birthday Birthday) string {
-	return birthday.dateOfBirth.Format(shortForm)
-}
 
 func TestGetBirthday(t *testing.T) {
-	fmt.Println("hello")
-	birthday := newBirthday("1994-20-12")
+	initDatabaseConnection()
+	defer db.Close()
+	initDatabaseTable()
+
+	name := "guillaume"
+	birthday := map[string]string{"dateOfBirth": "1994-12-20" }
 	jsondata, err := json.Marshal(birthday)
 	if err != nil {
 		panic(err)
 	}
 
 	t.Run("Save birthday date", func(t *testing.T) {
-		request, err := http.NewRequest(http.MethodPut, "http://127.0.0.1/hello/guillaume", bytes.NewBuffer(jsondata))
+		url := fmt.Sprintf("/hello/%s", name)
+		request, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(jsondata))
 		if err != nil {
 			panic(err)
 		}
-
 		response := httptest.NewRecorder()
-
 		birthdaySave(response, request)
 
 		got := response.Code
-		want := 200
+		want := 204
 		if got != want {
-			t.Errorf("got %q, want %q", got, want)
+			t.Errorf("got HTTP status %d, want %d", got, want)
 		}
 	})
 	t.Run("returns birthday date", func(t *testing.T) {
@@ -71,14 +46,14 @@ func TestGetBirthday(t *testing.T) {
 
 		birthdayGet(response, request)
 
-		// got := response.Code
-		// want := 200
-		// if got != want {
-		// 	t.Errorf("got %q, want %q", got, want)
-		// }
+		if response.Code != http.StatusOK {
+			t.Errorf("got %d, want %d", response.Code, http.StatusOK)
+		}
 
+
+		remainingDays := 47
 		got := response.Body.String()
-		want := string(jsondata[:])
+		want := fmt.Sprintf(`{"message":"Hello, %s! Your birthday is in %d day(s)"}`, name, remainingDays)
 		if got != want {
 			t.Errorf("got %q, want %q", got, want)
 		}
