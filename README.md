@@ -2,6 +2,19 @@ Goal of this project is to deploy a highly available API and a database backend 
 
 ![Alt text](./diagram.svg)
 
+# Development / Testing
+- start local postgres db
+
+`make start-local-db`
+
+- run unit test
+
+`make go-test`
+
+- stop local postgres db
+
+`make stop-local-db`
+
 # Terraform
 - Create 2 VPC app/db https://github.com/terraform-google-modules/terraform-google-network
 - Create a VPC peering https://registry.terraform.io/modules/terraform-google-modules/network/google/latest/submodules/network-peering
